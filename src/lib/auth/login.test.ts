@@ -47,4 +47,14 @@ describe("findMatchingMember", () => {
 
     expect(match).toBeNull();
   });
+
+  it("returns null when the stored member has no phone, even with a valid non-empty input phone", () => {
+    const match = findMatchingMember(members, {
+      generation: 4,
+      name: "김영희",
+      phone: "01099998888",
+    });
+
+    expect(match).toBeNull();
+  });
 });
