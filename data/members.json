@@ -1,0 +1,10 @@
+[
+  {
+    "id": "seed-admin",
+    "name": "관리자 이름을 입력하세요",
+    "generation": 1,
+    "parentId": null,
+    "role": "admin",
+    "phone": "01000000000"
+  }
+]
