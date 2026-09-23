@@ -9,7 +9,7 @@ vi.mock("./actions", () => ({
 }));
 
 describe("LoginForm", () => {
-  it("renders generation, name, and phone inputs plus a submit button", () => {
+  it("세대, 이름, 연락처 입력란과 제출 버튼을 렌더링한다", () => {
     render(<LoginForm />);
 
     expect(screen.getByLabelText("세대")).toBeInTheDocument();

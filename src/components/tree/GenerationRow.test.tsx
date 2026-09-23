@@ -4,7 +4,7 @@ import { GenerationRow } from "./GenerationRow";
 import type { Member } from "@/lib/members/schema";
 
 describe("GenerationRow", () => {
-  it("renders the generation label and one card per member", () => {
+  it("세대 라벨과 구성원별 카드를 렌더링한다", () => {
     const members: Member[] = [
       { id: "m1", name: "김철수", generation: 3, parentId: null },
       { id: "m2", name: "김영희", generation: 3, parentId: null },
@@ -17,7 +17,7 @@ describe("GenerationRow", () => {
     expect(screen.getByText("김영희")).toBeInTheDocument();
   });
 
-  it("cycles the palette attribute based on generation", () => {
+  it("세대에 따라 팔레트(data-palette) 속성이 순환한다", () => {
     const { container, rerender } = render(<GenerationRow generation={1} members={[]} />);
     expect(container.querySelector("[data-palette]")).toHaveAttribute("data-palette", "1");
 

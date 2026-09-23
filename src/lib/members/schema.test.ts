@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { parseMembers } from "@/lib/members/schema";
 
 describe("parseMembers", () => {
-  it("parses a valid members array", () => {
+  it("유효한 구성원 배열을 파싱한다", () => {
     const raw = JSON.stringify([
       { id: "a1", name: "김철수", generation: 1, parentId: null },
     ]);
@@ -13,7 +13,7 @@ describe("parseMembers", () => {
     expect(members[0].name).toBe("김철수");
   });
 
-  it("accepts optional fields including nested spouse info", () => {
+  it("배우자 정보 같은 중첩된 선택 항목도 허용한다", () => {
     const raw = JSON.stringify([
       {
         id: "a1",
@@ -30,7 +30,7 @@ describe("parseMembers", () => {
     expect(members[0].spouse?.name).toBe("이영희");
   });
 
-  it("rejects a record missing a required field", () => {
+  it("필수 항목이 빠진 레코드는 거부한다", () => {
     const raw = JSON.stringify([{ id: "a1", generation: 1, parentId: null }]);
 
     expect(() => parseMembers(raw)).toThrow();

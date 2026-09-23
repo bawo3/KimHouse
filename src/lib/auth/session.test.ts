@@ -8,21 +8,21 @@ beforeEach(() => {
   process.env.SESSION_JWT_SECRET = "test-secret-at-least-32-characters-long";
 });
 
-describe("session tokens", () => {
-  it("round-trips a payload through create and verify", async () => {
+describe("세션 토큰", () => {
+  it("생성과 검증을 거쳐도 페이로드가 그대로 유지된다", async () => {
     const token = await createSessionToken({ memberId: "m1", role: "admin" });
     const payload = await verifySessionToken(token);
 
     expect(payload).toEqual({ memberId: "m1", role: "admin" });
   });
 
-  it("returns null for a tampered or invalid token", async () => {
+  it("위조되었거나 유효하지 않은 토큰이면 null을 반환한다", async () => {
     const payload = await verifySessionToken("not-a-real-token");
 
     expect(payload).toBeNull();
   });
 
-  it("round-trips a payload without a role", async () => {
+  it("role이 없는 페이로드도 그대로 유지된다", async () => {
     const token = await createSessionToken({ memberId: "m2" });
     const payload = await verifySessionToken(token);
 

@@ -4,7 +4,7 @@ import { PersonCard } from "./PersonCard";
 import type { Member } from "@/lib/members/schema";
 
 describe("PersonCard", () => {
-  it("shows the name and generation, and hides optional fields when absent", () => {
+  it("이름과 세대를 표시하고, 선택 항목이 없으면 숨긴다", () => {
     const member: Member = { id: "m1", name: "김철수", generation: 3, parentId: null };
 
     render(<PersonCard member={member} />);
@@ -15,7 +15,7 @@ describe("PersonCard", () => {
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 
-  it("shows optional fields in a smaller list when present", () => {
+  it("선택 항목이 있으면 작은 목록 형태로 표시한다", () => {
     const member: Member = {
       id: "m1",
       name: "김철수",
@@ -31,7 +31,7 @@ describe("PersonCard", () => {
     expect(screen.getByText("연락처: 010-1111-2222")).toBeInTheDocument();
   });
 
-  it("renders a matching spouse card when spouse.name is present", () => {
+  it("spouse.name이 있으면 그에 맞는 배우자 카드를 렌더링한다", () => {
     const member: Member = {
       id: "m1",
       name: "김철수",
@@ -46,7 +46,7 @@ describe("PersonCard", () => {
     expect(screen.getByText("성씨/본관: 전주이씨")).toBeInTheDocument();
   });
 
-  it("renders no spouse card when spouse is absent", () => {
+  it("배우자 정보가 없으면 배우자 카드를 렌더링하지 않는다", () => {
     const member: Member = { id: "m1", name: "김철수", generation: 3, parentId: null };
 
     render(<PersonCard member={member} />);
