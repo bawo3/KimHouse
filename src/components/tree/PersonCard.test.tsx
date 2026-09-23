@@ -31,7 +31,7 @@ describe("PersonCard", () => {
     expect(screen.getByText("연락처: 010-1111-2222")).toBeInTheDocument();
   });
 
-  it("spouse.name이 있으면 그에 맞는 배우자 카드를 렌더링한다", () => {
+  it("spouse.name이 있으면 배우자 카드를 렌더링한다", () => {
     const member: Member = {
       id: "m1",
       name: "김철수",

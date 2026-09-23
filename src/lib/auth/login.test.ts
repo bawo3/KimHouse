@@ -8,7 +8,7 @@ const members: Member[] = [
 ];
 
 describe("findMatchingMember", () => {
-  it("세대, 이름, 정규화된 전화번호가 모두 일치하면 매칭된다", () => {
+  it("세대, 이름, 정규화된 연락처가 모두 일치하면 매칭된다", () => {
     const match = findMatchingMember(members, {
       generation: 3,
       name: "김철수",
@@ -18,7 +18,7 @@ describe("findMatchingMember", () => {
     expect(match?.id).toBe("m1");
   });
 
-  it("저장된 구성원에게 전화번호가 없으면 null을 반환한다", () => {
+  it("저장된 구성원에게 연락처가 없으면 null을 반환한다", () => {
     const match = findMatchingMember(members, {
       generation: 4,
       name: "김영희",
@@ -38,7 +38,7 @@ describe("findMatchingMember", () => {
     expect(match).toBeNull();
   });
 
-  it("입력한 전화번호가 비어 있으면 null을 반환한다", () => {
+  it("입력한 연락처가 비어 있으면 null을 반환한다", () => {
     const match = findMatchingMember(members, {
       generation: 3,
       name: "김철수",
@@ -48,7 +48,7 @@ describe("findMatchingMember", () => {
     expect(match).toBeNull();
   });
 
-  it("입력한 전화번호가 유효해도 저장된 구성원에게 전화번호가 없으면 null을 반환한다", () => {
+  it("입력한 연락처가 유효해도 저장된 구성원에게 연락처가 없으면 null을 반환한다", () => {
     const match = findMatchingMember(members, {
       generation: 4,
       name: "김영희",
