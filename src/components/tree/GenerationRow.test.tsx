@@ -16,4 +16,15 @@ describe("GenerationRow", () => {
     expect(screen.getByText("김철수")).toBeInTheDocument();
     expect(screen.getByText("김영희")).toBeInTheDocument();
   });
+
+  it("cycles the palette attribute based on generation", () => {
+    const { container, rerender } = render(<GenerationRow generation={1} members={[]} />);
+    expect(container.querySelector("[data-palette]")).toHaveAttribute("data-palette", "1");
+
+    rerender(<GenerationRow generation={6} members={[]} />);
+    expect(container.querySelector("[data-palette]")).toHaveAttribute("data-palette", "1");
+
+    rerender(<GenerationRow generation={5} members={[]} />);
+    expect(container.querySelector("[data-palette]")).toHaveAttribute("data-palette", "5");
+  });
 });
