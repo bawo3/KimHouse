@@ -48,5 +48,11 @@ describe("TreeCanvas", () => {
     );
 
     expect(container.querySelectorAll("line")).toHaveLength(1);
+
+    const line = container.querySelector("line")!;
+    expect(line.getAttribute("x1")).toBe("80");
+    expect(line.getAttribute("y1")).toBe("40");
+    expect(line.getAttribute("x2")).toBe("140");
+    expect(line.getAttribute("y2")).toBe("100");
   });
 });
