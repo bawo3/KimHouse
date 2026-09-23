@@ -12,6 +12,7 @@ describe("PersonCard", () => {
     expect(screen.getByText("김철수")).toBeInTheDocument();
     expect(screen.getByText("3대손")).toBeInTheDocument();
     expect(screen.queryByText(/연락처:/)).not.toBeInTheDocument();
+    expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 
   it("shows optional fields in a smaller list when present", () => {
@@ -51,5 +52,6 @@ describe("PersonCard", () => {
     render(<PersonCard member={member} />);
 
     expect(screen.queryByText("배우자")).not.toBeInTheDocument();
+    expect(screen.queryAllByRole("group")).toHaveLength(1);
   });
 });
