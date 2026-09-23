@@ -1,0 +1,27 @@
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-radius: 12px;
+}
+
+.row[data-palette="1"] { background: #fef6e4; }
+.row[data-palette="2"] { background: #e8f3f1; }
+.row[data-palette="3"] { background: #f1eaf6; }
+.row[data-palette="4"] { background: #eef4e8; }
+.row[data-palette="5"] { background: #f6ece9; }
+
+.label {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+}
+
+.cards {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  padding: 0.5rem;
+}
