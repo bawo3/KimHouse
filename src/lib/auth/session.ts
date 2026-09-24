@@ -2,6 +2,11 @@ import { SignJWT, jwtVerify } from "jose";
 
 const encoder = new TextEncoder();
 
+// 세션 정보를 담는 쿠키 이름.
+// - 이 값을 여러 파일에서 각자 문자열로 하드코딩하면 한쪽만 오타로 바뀌었을 때
+//   로그인이 항상 실패하는 등 조용히 깨질 수 있어, 여기서 한 번만 정의하고 재사용한다.
+export const SESSION_COOKIE_NAME = "session";
+
 // 세션 토큰(JWT) 안에 들어가는 정보
 // - memberId: 로그인한 인물의 id (필수)
 // - role: "admin"인 경우에만 값이 존재 (관리자 표시용, Task 3 스키마와 동일)

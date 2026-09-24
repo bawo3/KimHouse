@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { loadMembersFromDisk } from "@/lib/members/load";
 import { findMatchingMember } from "@/lib/auth/login";
-import { createSessionToken } from "@/lib/auth/session";
+import { SESSION_COOKIE_NAME, createSessionToken } from "@/lib/auth/session";
 
 // 로그인 폼(useActionState)이 화면에 보여줄 상태
 // - error가 있으면 화면에 에러 메시지를 띄운다.
@@ -50,7 +50,7 @@ export async function loginAction(
   const token = await createSessionToken({ memberId: match.id, role: match.role });
 
   const cookieStore = await cookies();
-  cookieStore.set("session", token, {
+  cookieStore.set(SESSION_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
