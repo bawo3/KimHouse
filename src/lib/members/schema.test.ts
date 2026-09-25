@@ -35,4 +35,24 @@ describe("parseMembers", () => {
 
     expect(() => parseMembers(raw)).toThrow();
   });
+
+  it("role에 admin과 owner를 모두 허용한다", () => {
+    const raw = JSON.stringify([
+      { id: "a1", name: "관리자", generation: 1, parentId: null, role: "admin" },
+      { id: "a2", name: "소유자", generation: 1, parentId: null, role: "owner" },
+    ]);
+
+    const members = parseMembers(raw);
+
+    expect(members[0].role).toBe("admin");
+    expect(members[1].role).toBe("owner");
+  });
+
+  it("role에 admin/owner가 아닌 값이 오면 거부한다", () => {
+    const raw = JSON.stringify([
+      { id: "a1", name: "이상한값", generation: 1, parentId: null, role: "superuser" },
+    ]);
+
+    expect(() => parseMembers(raw)).toThrow();
+  });
 });

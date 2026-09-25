@@ -14,7 +14,10 @@ export const spouseSchema = z.object({
 // - id: 고유 식별자
 // - generation: 몇 세대인지 (1 이상의 정수)
 // - parentId: 부모의 id. 최상위 조상은 parentId가 null.
-// - role: "admin"인 경우에만 값이 존재 (관리자 표시용)
+// - role: 관리자 등급을 나타내며, 값이 없으면 일반 회원이다.
+//   - "admin": 일반 관리자. 회원가입 승인/회원관리 등을 수행할 수 있다.
+//   - "owner": 최상위 소유자(문중 대표 전용). admin의 모든 권한에 더해,
+//     다른 사람에게 admin 권한을 부여하거나 회수할 수 있는 유일한 등급이다.
 export const memberSchema = z.object({
   id: z.string().min(1),
   name: z.string().min(1),
@@ -25,7 +28,7 @@ export const memberSchema = z.object({
   phone: z.string().optional(),
   address: z.string().optional(),
   deathDate: z.string().optional(),
-  role: z.literal("admin").optional(),
+  role: z.enum(["admin", "owner"]).optional(),
   spouse: spouseSchema.optional(),
 });
 
