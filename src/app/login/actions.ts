@@ -24,18 +24,19 @@ export async function loginAction(
   const name = formData.get("name");
   const phone = formData.get("phone");
 
-  const generation = Number(generationRaw);
+  // 입력값 검증: 이름과 연락처는 필수이지만, 세대는 선택 입력(관리자는 생략 가능)이다.
+  if (typeof name !== "string" || !name.trim() || typeof phone !== "string" || !phone.trim()) {
+    return { error: "이름과 연락처를 입력해 주세요." };
+  }
 
-  // 입력값 검증: 세 항목이 모두 채워져 있어야 한다.
-  if (
-    !generationRaw ||
-    Number.isNaN(generation) ||
-    typeof name !== "string" ||
-    !name.trim() ||
-    typeof phone !== "string" ||
-    !phone.trim()
-  ) {
-    return { error: "세대, 이름, 연락처를 모두 입력해 주세요." };
+  // 세대는 비어 있으면 생략(undefined)하고, 값이 있으면 숫자로 변환해 검증한다.
+  let generation: number | undefined;
+  if (generationRaw && String(generationRaw).trim()) {
+    const parsed = Number(generationRaw);
+    if (Number.isNaN(parsed)) {
+      return { error: "세대는 숫자로 입력해 주세요." };
+    }
+    generation = parsed;
   }
 
   // 명부 로딩과 매칭 로직은 기존에 구현된 함수를 그대로 재사용한다(중복 구현 금지).

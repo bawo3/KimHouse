@@ -13,8 +13,8 @@ export function LoginForm() {
   return (
     <form action={formAction}>
       <label>
-        세대
-        <input name="generation" type="number" inputMode="numeric" required />
+        세대 (선택 — 관리자는 생략 가능)
+        <input name="generation" type="number" inputMode="numeric" />
       </label>
       <label>
         이름
