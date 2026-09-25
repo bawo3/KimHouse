@@ -24,7 +24,7 @@ describe("parsePendingRequest", () => {
 
     const request = parsePendingRequest(raw);
 
-    expect(request.member.role).toBeUndefined();
+    expect(Object.keys(request.member)).not.toContain("role");
   });
 
   it("이름이 없으면 거부한다", () => {
