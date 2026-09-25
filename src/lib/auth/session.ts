@@ -9,10 +9,10 @@ export const SESSION_COOKIE_NAME = "session";
 
 // 세션 토큰(JWT) 안에 들어가는 정보
 // - memberId: 로그인한 인물의 id (필수)
-// - role: "admin"인 경우에만 값이 존재 (관리자 표시용, Task 3 스키마와 동일)
+// - role: "admin" 또는 "owner"인 경우에만 값이 존재 (관리자 표시용, Task 3 스키마와 동일)
 export interface SessionPayload {
   memberId: string;
-  role?: "admin";
+  role?: "admin" | "owner";
 }
 
 // JWT 서명/검증에 쓰는 비밀키를 환경변수에서 읽어온다.
@@ -45,7 +45,10 @@ export async function verifySessionToken(token: string): Promise<SessionPayload 
     if (typeof payload.memberId !== "string") return null;
     return {
       memberId: payload.memberId,
-      role: payload.role === "admin" ? "admin" : undefined,
+      role:
+        payload.role === "admin" || payload.role === "owner"
+          ? (payload.role as "admin" | "owner")
+          : undefined,
     };
   } catch {
     return null;
