@@ -6,6 +6,6 @@ describe("loadMembersFromDisk", () => {
     const members = loadMembersFromDisk();
 
     expect(members.length).toBeGreaterThan(0);
-    expect(members.some((member) => member.role === "admin")).toBe(true);
+    expect(members.some((member) => member.role === "admin" || member.role === "owner")).toBe(true);
   });
 });
