@@ -85,3 +85,15 @@ describe("deleteFileIfExists", () => {
     expect(mockDeleteFile).not.toHaveBeenCalled();
   });
 });
+
+describe("환경변수 누락", () => {
+  it("GITHUB_TOKEN이 없으면 명확한 에러를 던진다", async () => {
+    delete process.env.GITHUB_TOKEN;
+
+    const { commitFile } = await import("./client");
+
+    await expect(commitFile("data/members.json", "[]", "test")).rejects.toThrow(
+      /GITHUB_TOKEN/
+    );
+  });
+});
