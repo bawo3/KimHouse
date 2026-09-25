@@ -9,12 +9,17 @@ vi.mock("./actions", () => ({
 }));
 
 describe("LoginForm", () => {
-  it("세대, 이름, 연락처 입력란과 제출 버튼을 렌더링한다", () => {
+  it("이름, 연락처 입력란과 제출 버튼을 렌더링한다", () => {
     render(<LoginForm />);
 
-    expect(screen.getByLabelText(/^세대/)).toBeInTheDocument();
     expect(screen.getByLabelText("이름")).toBeInTheDocument();
     expect(screen.getByLabelText("연락처")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "들어가기" })).toBeInTheDocument();
+  });
+
+  it("세대 입력란은 더 이상 존재하지 않는다", () => {
+    render(<LoginForm />);
+
+    expect(screen.queryByLabelText(/세대/)).not.toBeInTheDocument();
   });
 });

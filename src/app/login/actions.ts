@@ -13,38 +13,27 @@ export interface LoginFormState {
 }
 
 // 로그인 폼 제출 시 실행되는 서버 액션
-// - 세대/이름/연락처 입력값을 받아 명부(members.json)와 대조한다.
+// - 이름/연락처 입력값을 받아 명부(members.json)와 대조한다.
 // - 일치하는 인물이 있으면 세션 토큰을 쿠키에 저장하고 /tree로 이동시킨다.
 // - 일치하지 않으면 에러 메시지를 담은 상태를 반환해 화면에 보여준다.
 export async function loginAction(
   _prevState: LoginFormState,
   formData: FormData
 ): Promise<LoginFormState> {
-  const generationRaw = formData.get("generation");
   const name = formData.get("name");
   const phone = formData.get("phone");
 
-  // 입력값 검증: 이름과 연락처는 필수이지만, 세대는 선택 입력(관리자는 생략 가능)이다.
+  // 입력값 검증: 이름과 연락처는 둘 다 필수다.
   if (typeof name !== "string" || !name.trim() || typeof phone !== "string" || !phone.trim()) {
     return { error: "이름과 연락처를 입력해 주세요." };
   }
 
-  // 세대는 비어 있으면 생략(undefined)하고, 값이 있으면 숫자로 변환해 검증한다.
-  let generation: number | undefined;
-  if (generationRaw && String(generationRaw).trim()) {
-    const parsed = Number(generationRaw);
-    if (Number.isNaN(parsed)) {
-      return { error: "세대는 숫자로 입력해 주세요." };
-    }
-    generation = parsed;
-  }
-
   // 명부 로딩과 매칭 로직은 기존에 구현된 함수를 그대로 재사용한다(중복 구현 금지).
   const members = loadMembersFromDisk();
-  const match = findMatchingMember(members, { generation, name: name.trim(), phone });
+  const match = findMatchingMember(members, { name: name.trim(), phone });
 
   if (!match) {
-    return { error: "일치하는 정보를 찾을 수 없습니다. 세대·이름·연락처를 다시 확인해 주세요." };
+    return { error: "일치하는 정보를 찾을 수 없습니다. 이름·연락처를 다시 확인해 주세요." };
   }
 
   // 로그인 성공: 세션 토큰(JWT)을 발급하고 쿠키에 저장한다.

@@ -9,9 +9,8 @@ const members: Member[] = [
 ];
 
 describe("findMatchingMember", () => {
-  it("세대, 이름, 정규화된 연락처가 모두 일치하면 매칭된다", () => {
+  it("이름과 정규화된 연락처가 모두 일치하면 매칭된다", () => {
     const match = findMatchingMember(members, {
-      generation: 3,
       name: "김철수",
       phone: "01011112222",
     });
@@ -19,47 +18,16 @@ describe("findMatchingMember", () => {
     expect(match?.id).toBe("m1");
   });
 
-  it("저장된 구성원에게 연락처가 없으면 null을 반환한다", () => {
+  it("하이픈 등 표기가 달라도 정규화 후 연락처가 같으면 매칭된다", () => {
     const match = findMatchingMember(members, {
-      generation: 4,
-      name: "김영희",
-      phone: "",
-    });
-
-    expect(match).toBeNull();
-  });
-
-  it("세대가 일치하지 않으면 null을 반환한다", () => {
-    const match = findMatchingMember(members, {
-      generation: 99,
       name: "김철수",
-      phone: "01011112222",
+      phone: "010-1111-2222",
     });
 
-    expect(match).toBeNull();
+    expect(match?.id).toBe("m1");
   });
 
-  it("입력한 연락처가 비어 있으면 null을 반환한다", () => {
-    const match = findMatchingMember(members, {
-      generation: 3,
-      name: "김철수",
-      phone: "",
-    });
-
-    expect(match).toBeNull();
-  });
-
-  it("입력한 연락처가 유효해도 저장된 구성원에게 연락처가 없으면 null을 반환한다", () => {
-    const match = findMatchingMember(members, {
-      generation: 4,
-      name: "김영희",
-      phone: "01099998888",
-    });
-
-    expect(match).toBeNull();
-  });
-
-  it("admin/owner는 세대를 입력하지 않아도 이름+연락처만 일치하면 매칭된다", () => {
+  it("role(admin/owner)에 상관없이 이름과 연락처만 일치하면 매칭된다", () => {
     const match = findMatchingMember(members, {
       name: "김재현",
       phone: "01074889333",
@@ -68,30 +36,30 @@ describe("findMatchingMember", () => {
     expect(match?.id).toBe("m3");
   });
 
-  it("세대를 생략했을 때 일반 회원(admin/owner가 아님)은 매칭되지 않는다", () => {
+  it("저장된 구성원에게 연락처가 없으면 이름이 일치해도 null을 반환한다", () => {
     const match = findMatchingMember(members, {
-      name: "김철수",
-      phone: "01011112222",
+      name: "김영희",
+      phone: "01099998888",
     });
 
     expect(match).toBeNull();
   });
 
-  it("세대를 입력하면 admin/owner도 기존처럼 세대까지 일치해야 매칭된다", () => {
-    const wrongGeneration = findMatchingMember(members, {
-      generation: 99,
-      name: "김재현",
-      phone: "01074889333",
+  it("입력한 연락처가 비어 있으면 null을 반환한다", () => {
+    const match = findMatchingMember(members, {
+      name: "김철수",
+      phone: "",
     });
 
-    expect(wrongGeneration).toBeNull();
+    expect(match).toBeNull();
+  });
 
-    const correctGeneration = findMatchingMember(members, {
-      generation: 1,
-      name: "김재현",
-      phone: "01074889333",
+  it("이름이 일치하지 않으면 null을 반환한다", () => {
+    const match = findMatchingMember(members, {
+      name: "존재하지않는이름",
+      phone: "01011112222",
     });
 
-    expect(correctGeneration?.id).toBe("m3");
+    expect(match).toBeNull();
   });
 });
