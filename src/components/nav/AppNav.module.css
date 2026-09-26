@@ -1,0 +1,41 @@
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: #f5f5f0;
+  border-bottom: 1px solid #d0d0d0;
+}
+
+/* 고령자 접근성: 글씨를 크게, 터치 영역을 넉넉하게 확보한다. */
+.link {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  color: #222222;
+  text-decoration: none;
+}
+
+.link:hover,
+.link:focus-visible {
+  background: #e0e0d8;
+}
+
+.logoutButton {
+  margin-left: auto;
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 0.6rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid #b0b0b0;
+  background: #ffffff;
+  color: #222222;
+  cursor: pointer;
+}
+
+.logoutButton:hover,
+.logoutButton:focus-visible {
+  background: #e0e0d8;
+}
