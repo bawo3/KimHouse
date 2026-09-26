@@ -170,3 +170,35 @@ export async function addMemberAction(
 
   return { success: true };
 }
+
+// 회원관리 화면에서 admin/owner가 사람을 삭제한다.
+// - owner 레코드는 삭제를 거부한다: owner를 다른 사람에게 넘기는 절차가 별도로 없으므로,
+//   유일한 owner를 지우면 아무도 권한을 관리할 수 없게 되는 것을 막는 안전장치다.
+// - 대상을 찾지 못하면 조용히 반환한다(rejectRequestAction과 동일한 멱등 패턴).
+// - 대상의 자식(parentId가 이 사람인 인물들)은 고아가 되지 않도록 parentId를 null로 되돌리고,
+//   대상 제거와 함께 한 번의 commitFile로 커밋한다(따로 커밋하면 중간 실패 시 정합성이 깨질 수 있다).
+export async function deleteMemberAction(memberId: string): Promise<void> {
+  await assertElevated();
+
+  const members = loadMembersFromDisk();
+  const target = members.find((member) => member.id === memberId);
+  if (!target) return;
+
+  if (target.role === "owner") {
+    throw new Error(
+      "owner는 삭제할 수 없습니다 — 먼저 다른 사람에게 owner를 넘기는 절차가 없으므로, 유일한 owner를 지우면 아무도 권한을 관리할 수 없게 됩니다."
+    );
+  }
+
+  const updatedMembers = members
+    .filter((member) => member.id !== memberId)
+    .map((member) => (member.parentId === memberId ? { ...member, parentId: null } : member));
+
+  await commitFile(
+    "data/members.json",
+    JSON.stringify(updatedMembers, null, 2),
+    `Delete member ${target.name}`
+  );
+
+  revalidatePath("/admin/members");
+}

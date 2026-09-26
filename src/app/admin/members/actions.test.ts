@@ -205,3 +205,71 @@ describe("addMemberAction", () => {
     expect(mockCommitFile).not.toHaveBeenCalled();
   });
 });
+
+describe("deleteMemberAction", () => {
+  it("owner 레코드는 삭제를 거부하고 commitFile을 호출하지 않는다", async () => {
+    mockLoadMembersFromDisk.mockReturnValue([
+      { id: "owner-1", name: "김할아버지", generation: 1, parentId: null, role: "owner" },
+    ]);
+    const { deleteMemberAction } = await import("./actions");
+
+    await expect(deleteMemberAction("owner-1")).rejects.toThrow();
+    expect(mockCommitFile).not.toHaveBeenCalled();
+  });
+
+  it("자식이 있는 레코드를 삭제하면 모든 자식의 parentId가 null로 바뀐 채 한 번에 커밋된다", async () => {
+    mockCommitFile.mockResolvedValue(undefined);
+    mockLoadMembersFromDisk.mockReturnValue([
+      { id: "owner-1", name: "김할아버지", generation: 1, parentId: null, role: "owner" },
+      { id: "target-1", name: "김아버지", generation: 2, parentId: "owner-1" },
+      { id: "child-1", name: "김아들", generation: 3, parentId: "target-1" },
+      { id: "child-2", name: "김딸", generation: 3, parentId: "target-1" },
+    ]);
+    const { deleteMemberAction } = await import("./actions");
+
+    await deleteMemberAction("target-1");
+
+    expect(mockCommitFile).toHaveBeenCalledTimes(1);
+    const [, content] = mockCommitFile.mock.calls[0];
+    const committed = JSON.parse(content as string) as Member[];
+
+    expect(committed.find((member) => member.id === "target-1")).toBeUndefined();
+    expect(committed.find((member) => member.id === "child-1")?.parentId).toBeNull();
+    expect(committed.find((member) => member.id === "child-2")?.parentId).toBeNull();
+
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/admin/members");
+  });
+
+  it("존재하지 않는 id면 조용히 아무 일도 하지 않는다", async () => {
+    mockLoadMembersFromDisk.mockReturnValue([
+      { id: "owner-1", name: "김할아버지", generation: 1, parentId: null, role: "owner" },
+    ]);
+    const { deleteMemberAction } = await import("./actions");
+
+    await expect(deleteMemberAction("no-such-id")).resolves.toBeUndefined();
+    expect(mockCommitFile).not.toHaveBeenCalled();
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("세션이 없으면 에러를 던지고 commitFile을 호출하지 않는다", async () => {
+    mockGetSession.mockResolvedValue(null);
+    mockLoadMembersFromDisk.mockReturnValue([
+      { id: "target-1", name: "김아버지", generation: 2, parentId: null },
+    ]);
+    const { deleteMemberAction } = await import("./actions");
+
+    await expect(deleteMemberAction("target-1")).rejects.toThrow();
+    expect(mockCommitFile).not.toHaveBeenCalled();
+  });
+
+  it("일반 회원(role 없음) 세션이면 에러를 던지고 commitFile을 호출하지 않는다", async () => {
+    mockGetSession.mockResolvedValue({ memberId: "member-1" });
+    mockLoadMembersFromDisk.mockReturnValue([
+      { id: "target-1", name: "김아버지", generation: 2, parentId: null },
+    ]);
+    const { deleteMemberAction } = await import("./actions");
+
+    await expect(deleteMemberAction("target-1")).rejects.toThrow();
+    expect(mockCommitFile).not.toHaveBeenCalled();
+  });
+});
