@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { addMemberAction, type AddMemberFormState } from "./actions";
 import { SubmitButton } from "@/components/admin/SubmitButton";
 import type { Member } from "@/lib/members/schema";
@@ -21,29 +21,52 @@ export function AddMemberForm({ members }: { members: Member[] }) {
   const [state, dispatchAddMember] = useActionState(addMemberAction, initialState);
   const [parentId, setParentId] = useState(NO_PARENT_VALUE);
   const [lastAddedName, setLastAddedName] = useState("");
+  const formRef = useRef<HTMLFormElement>(null);
+  // 제출 시점의 입력값 스냅샷 - 검증 실패로 폼이 초기화됐을 때 그대로 복원하기 위해 보관한다.
+  // 화면을 다시 그릴 필요가 없는 값이라 useState 대신 ref로 들고 있는다.
+  const lastSubmittedValuesRef = useRef<Record<string, string>>({});
   const hasParent = parentId !== NO_PARENT_VALUE;
 
-  // 제출된 이름을 먼저 기억해 둔 다음 실제 서버 액션(dispatchAddMember)에 그대로 전달한다.
-  // - React는 액션이 성공적으로 끝나면 폼의 입력칸들을 자동으로 비우기 때문에(브라우저의 기본 제출 동작과 동일),
-  //   그 이후에 DOM에서 이름 값을 다시 읽으려 하면 이미 지워진 뒤라 항상 빈 문자열만 얻게 된다.
-  //   그래서 "지워지기 직전"이 아니라 "제출하는 바로 그 순간"에 이름을 미리 붙잡아 둔다.
+  // React는 폼 액션을 실행하기 전에 폼의 입력칸들을 먼저 초기화한다 - 성공/실패 여부와 무관하게 항상 일어난다.
+  // 그래서 "성공했을 때만 지워질 것"이라 가정하면 안 되고, 지워지기 전(=제출하는 바로 그 순간)에
+  // FormData 스냅샷으로 전체 필드 값을 미리 붙잡아 둬야 실패 시에도 값을 되돌려 줄 수 있다.
   function formAction(formData: FormData) {
-    const name = formData.get("name");
-    setLastAddedName(typeof name === "string" ? name : "");
+    const values: Record<string, string> = {};
+    for (const [key, value] of formData.entries()) {
+      if (typeof value === "string") {
+        values[key] = value;
+      }
+    }
+    lastSubmittedValuesRef.current = values;
+    setLastAddedName(values.name ?? "");
     return dispatchAddMember(formData);
   }
 
-  // 서버 액션이 성공을 반환할 때마다(state가 새 객체로 바뀔 때마다) 부모 선택 상태를 초기화한다.
-  // - 이름 등 일반 입력칸들은 React가 액션 성공 시 자동으로 비워주지만, <select>는 이 컴포넌트가
-  //   value={parentId}로 직접 제어하고 있어서 자동 초기화 대상이 아니므로 별도로 리셋해야 한다.
   useEffect(() => {
     if (state.success) {
+      // 성공: 부모 선택 상태만 별도로 초기화한다.
+      // (다른 입력칸들은 React가 이미 비워둔 상태 그대로 두고, <select>는 이 컴포넌트가
+      //  value={parentId}로 직접 제어하고 있어서 자동 초기화 대상이 아니므로 여기서 리셋한다.)
       setParentId(NO_PARENT_VALUE);
+      return;
+    }
+
+    if (state.error && formRef.current) {
+      // 실패: React가 제출 직전에 이미 지워버린 값들을 방금 캡처해 둔 스냅샷으로 복원한다.
+      // 오탈자 하나 때문에 11개 필드를 전부 다시 입력하게 만들지 않기 위함.
+      // parentId는 <select value={parentId}>가 React state로 그대로 제어하고 있어 따로 복원할 필요가 없다.
+      for (const [key, value] of Object.entries(lastSubmittedValuesRef.current)) {
+        if (key === "parentId") continue;
+        const field = formRef.current.elements.namedItem(key);
+        if (field instanceof HTMLInputElement) {
+          field.value = value;
+        }
+      }
     }
   }, [state]);
 
   return (
-    <form action={formAction}>
+    <form ref={formRef} action={formAction}>
       <h2>회원 추가</h2>
       {state.success && lastAddedName && <p role="status">{lastAddedName}님을 등록했습니다.</p>}
       <label>

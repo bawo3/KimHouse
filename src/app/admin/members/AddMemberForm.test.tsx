@@ -63,15 +63,37 @@ describe("AddMemberForm", () => {
     expect(nameInput).toHaveValue("");
   });
 
-  it("추가에 실패하면 에러 메시지를 보여주고 폼은 초기화하지 않는다", async () => {
+  it("추가에 실패하면 에러 메시지를 보여주고 입력했던 값을 그대로 유지한다", async () => {
     mockAddMemberAction.mockResolvedValue({ error: "존재하지 않는 부모입니다." });
     const user = userEvent.setup();
     render(<AddMemberForm members={members} />);
 
-    await user.type(screen.getByLabelText("이름"), "김넷째");
+    const nameInput = screen.getByLabelText("이름");
+    const phoneInput = screen.getByLabelText("연락처");
+    await user.type(nameInput, "김넷째");
     await user.type(screen.getByLabelText("세대"), "3");
+    await user.type(phoneInput, "01011112222");
     await user.click(screen.getByRole("button", { name: "추가" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent("존재하지 않는 부모입니다.");
+    // React가 제출 시점에 폼을 먼저 초기화해버리므로(성공/실패 무관), 실패한 경우에는
+    // 우리가 직접 입력값을 복원해 주지 않으면 11개 필드를 전부 다시 입력해야 한다 - 그걸 막는 회귀 테스트.
+    expect(nameInput).toHaveValue("김넷째");
+    expect(screen.getByLabelText("세대")).toHaveValue(3);
+    expect(phoneInput).toHaveValue("01011112222");
+  });
+
+  it("부모를 선택한 상태로 추가에 성공하면 부모 선택이 다시 '없음'으로 초기화된다", async () => {
+    mockAddMemberAction.mockResolvedValue({ success: true });
+    const user = userEvent.setup();
+    render(<AddMemberForm members={members} />);
+
+    const parentSelect = screen.getByLabelText("부모");
+    await user.selectOptions(parentSelect, "1");
+    await user.type(screen.getByLabelText("이름"), "김넷째");
+    await user.click(screen.getByRole("button", { name: "추가" }));
+
+    await screen.findByRole("status");
+    expect(parentSelect).toHaveValue("");
   });
 });
