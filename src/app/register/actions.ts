@@ -28,7 +28,12 @@ export async function registerAction(
   }
 
   const generation = Number(generationRaw);
-  if (!generationRaw || Number.isNaN(generation) || generation <= 0) {
+  if (
+    !generationRaw ||
+    Number.isNaN(generation) ||
+    !Number.isInteger(generation) ||
+    generation <= 0
+  ) {
     return { error: "세대를 올바르게 입력해 주세요." };
   }
 
