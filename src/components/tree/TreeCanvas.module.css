@@ -17,6 +17,27 @@
   background: #f5f5f5;
 }
 
+.searchInput {
+  padding: 0.6rem 1rem;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  font-size: 1rem;
+  min-width: 12rem;
+}
+
+.noMatchMessage {
+  margin: 0 0 0.75rem;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.highlighted {
+  outline: 3px solid #f5c518;
+  outline-offset: 2px;
+  background-color: #fff9c4;
+  transition: outline-color 0.2s ease, background-color 0.2s ease;
+}
+
 .canvas {
   position: relative;
 }

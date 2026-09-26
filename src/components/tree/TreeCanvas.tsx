@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { Member } from "@/lib/members/schema";
 import { GenerationRow } from "./GenerationRow";
 import styles from "./TreeCanvas.module.css";
@@ -22,6 +22,9 @@ function clampZoom(value: number): number {
   return Math.round(clamped * 100) / 100;
 }
 
+// 검색으로 찾은 카드를 강조 표시하는 시간(ms) — 이 시간이 지나면 하이라이트 클래스를 제거한다.
+const HIGHLIGHT_DURATION_MS = 2000;
+
 // 부모-자녀를 잇는 연결선 하나의 좌표 정보 (컨테이너 기준 상대 좌표)
 interface Line {
   id: string;
@@ -38,7 +41,62 @@ export function TreeCanvas({ rows, members }: { rows: GenerationRowData[]; membe
   const containerRef = useRef<HTMLDivElement>(null);
   const [lines, setLines] = useState<Line[]>([]);
   const [zoom, setZoom] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const membersById = useMemo(() => new Map(members.map((member) => [member.id, member])), [members]);
+
+  // 현재 하이라이트 중인 카드 엘리먼트와, 그 하이라이트를 해제할 타이머를 기억해둔다.
+  // (검색어가 바뀔 때마다 이전 하이라이트/타이머를 확실히 정리하기 위함 — 안 그러면
+  // 연속으로 검색할 때 타이머 두 개가 경쟁하거나 예전 카드에 하이라이트가 남아있게 된다.)
+  const highlightedElementRef = useRef<HTMLElement | null>(null);
+  const highlightTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 검색어가 있는데 일치하는 사람이 한 명도 없을 때만 "일치하는 사람이 없습니다" 안내를 보여준다.
+  const showNoMatchMessage = searchQuery.length > 0 && !members.some((member) => member.name.includes(searchQuery));
+
+  function clearHighlight() {
+    if (highlightTimeoutRef.current !== null) {
+      clearTimeout(highlightTimeoutRef.current);
+      highlightTimeoutRef.current = null;
+    }
+    if (highlightedElementRef.current) {
+      highlightedElementRef.current.classList.remove(styles.highlighted);
+      highlightedElementRef.current = null;
+    }
+  }
+
+  // 언마운트 시 남아있는 타이머를 정리한다(이미 사라진 DOM에 대해 classList 조작을 시도하지 않도록).
+  useEffect(() => {
+    return () => {
+      if (highlightTimeoutRef.current !== null) {
+        clearTimeout(highlightTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  function handleSearchChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const query = event.target.value;
+    setSearchQuery(query);
+
+    // 검색어가 바뀔 때마다 이전 하이라이트/타이머를 먼저 정리하고 새로 찾는다.
+    clearHighlight();
+
+    if (query.length === 0) return;
+
+    const match = members.find((member) => member.name.includes(query));
+    if (!match) return;
+
+    const target = containerRef.current?.querySelector(`[data-person-id="${match.id}"]`);
+    if (!(target instanceof HTMLElement)) return;
+
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+    target.classList.add(styles.highlighted);
+    highlightedElementRef.current = target;
+    highlightTimeoutRef.current = setTimeout(() => {
+      target.classList.remove(styles.highlighted);
+      highlightedElementRef.current = null;
+      highlightTimeoutRef.current = null;
+    }, HIGHLIGHT_DURATION_MS);
+  }
 
   function handleZoomIn() {
     setZoom((current) => clampZoom(current + ZOOM_STEP));
@@ -105,7 +163,15 @@ export function TreeCanvas({ rows, members }: { rows: GenerationRowData[]; membe
         <button type="button" onClick={handleZoomIn} className={styles.zoomButton}>
           확대
         </button>
+        <input
+          type="search"
+          placeholder="이름으로 찾기"
+          value={searchQuery}
+          onChange={handleSearchChange}
+          className={styles.searchInput}
+        />
       </div>
+      {showNoMatchMessage && <p className={styles.noMatchMessage}>일치하는 사람이 없습니다</p>}
       <div
         ref={containerRef}
         className={styles.canvas}
