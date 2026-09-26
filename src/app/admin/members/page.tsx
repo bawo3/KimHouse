@@ -1,6 +1,7 @@
 import { loadMembersFromDisk } from "@/lib/members/load";
 import { getSession } from "@/lib/auth/getSession";
 import { MemberRow } from "@/components/admin/MemberRow";
+import { AddMemberForm } from "./AddMemberForm";
 
 // 회원관리 화면.
 // - /admin 레이아웃 가드(src/app/admin/layout.tsx)가 이미 로그인/권한(admin/owner) 체크를 마쳤으므로
@@ -15,6 +16,7 @@ export default async function MembersPage() {
   return (
     <main>
       <h1>회원관리</h1>
+      <AddMemberForm members={members} />
       {members.map((member) => (
         <MemberRow key={member.id} member={member} isOwnerViewer={isOwnerViewer} />
       ))}
