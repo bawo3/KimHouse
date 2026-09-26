@@ -4,6 +4,7 @@ import type { Member } from "@/lib/members/schema";
 const mockCommitFile = vi.fn();
 const mockGetSession = vi.fn();
 const mockLoadMembersFromDisk = vi.fn();
+const mockRevalidatePath = vi.fn();
 
 // commitFile은 실제 GitHub API를 호출하므로 mock 처리한다 (register/actions.test.ts 패턴 재사용).
 vi.mock("@/lib/github/client", () => ({
@@ -18,6 +19,11 @@ vi.mock("@/lib/auth/getSession", () => ({
 // data/members.json 실제 파일 내용에 테스트가 의존하지 않도록 mock 처리한다.
 vi.mock("@/lib/members/load", () => ({
   loadMembersFromDisk: mockLoadMembersFromDisk,
+}));
+
+// revalidatePath는 실제 요청(static generation store) 컨텍스트 밖에서 호출하면 에러를 던지므로 mock 처리한다.
+vi.mock("next/cache", () => ({
+  revalidatePath: mockRevalidatePath,
 }));
 
 const baseMembers: Member[] = [
@@ -159,6 +165,26 @@ describe("addMemberAction", () => {
     const committed = JSON.parse(content as string) as Member[];
     const added = committed.find((member) => member.name === "김독립");
     expect(added?.spouse).toBeUndefined();
+  });
+
+  it("배우자 이름만 입력하고 나머지 배우자 필드는 비워도 에러 없이 처리된다", async () => {
+    mockCommitFile.mockResolvedValue(undefined);
+    const { addMemberAction } = await import("./actions");
+    const formData = buildFormData({ name: "김독립", generation: "3", spouseName: "이배우자" });
+
+    const result = await addMemberAction({}, formData);
+
+    expect(result.success).toBe(true);
+    const [, content] = mockCommitFile.mock.calls[0];
+    const committed = JSON.parse(content as string) as Member[];
+    const added = committed.find((member) => member.name === "김독립");
+    expect(added?.spouse).toEqual({
+      name: "이배우자",
+      birthDate: undefined,
+      clanName: undefined,
+      phone: undefined,
+      deathDate: undefined,
+    });
   });
 
   it("세션이 없으면 에러를 던지고 commitFile을 호출하지 않는다", async () => {

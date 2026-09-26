@@ -166,5 +166,7 @@ export async function addMemberAction(
     `Add member ${name}`
   );
 
+  revalidatePath("/admin/members");
+
   return { success: true };
 }
