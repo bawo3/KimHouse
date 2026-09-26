@@ -13,6 +13,8 @@
    ⚠️ 보안 주의: 이 저장소는 현재 GitHub에 공개(public) 상태이며, `data/members.json`에는 실제 가족 구성원의 개인정보(이름, 연락처 등)가 들어갑니다. 로그인 인증이 연락처 일치 여부로 이루어지므로, 저장소가 공개 상태이면 누구나 그 연락처로 로그인할 수 있습니다(가족 구성원은 물론 관리자 계정도 포함). **실제 데이터를 입력하기 전에 반드시 GitHub 저장소를 비공개(Private)로 전환하십시오** (GitHub 저장소 페이지 → Settings → General → 맨 아래 "Danger Zone" → "Change repository visibility" → Private). Vercel 무료(Hobby) 티어에서도 비공개 저장소 배포가 지원됩니다.
 
 4. `.env.local`에 `GITHUB_TOKEN`(저장소 쓰기 권한이 있는 GitHub Personal Access Token), `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`도 추가합니다 — 회원가입 신청/승인/회원관리가 실제로 커밋을 만들려면 필요합니다.
+
+   ⚠️ `GITHUB_TOKEN`은 비밀번호와 같은 민감한 값입니다. 이 저장소(`bawo3/KimHouse`) 하나에만 접근 가능한 **fine-grained personal access token**으로 발급받는 것을 권장합니다(GitHub → Settings → Developer settings → Fine-grained tokens → Repository access를 이 저장소로만 제한, Contents 권한을 Read and write로 설정). 모든 저장소에 접근 가능한 classic 토큰(`repo` scope)은 이 프로젝트에 필요한 것보다 훨씬 넓은 권한을 주므로 피하십시오. 어디에도 붙여넣거나 공유하지 말고, 유출이 의심되면 즉시 재발급하십시오.
 5. `npm run dev` 후 http://localhost:3000 접속.
 
 ## 테스트
@@ -30,7 +32,7 @@ npm test -- <파일명>
 ## Vercel 배포
 
 1. 이 저장소(https://github.com/bawo3/KimHouse.git)를 Vercel 프로젝트로 연결합니다.
-2. Vercel 프로젝트 환경변수에 `SESSION_JWT_SECRET`을 등록합니다.
+2. Vercel 프로젝트 환경변수에 `SESSION_JWT_SECRET`과 `GITHUB_TOKEN`, `GITHUB_OWNER`, `GITHUB_REPO`, `GITHUB_BRANCH`를 모두 등록합니다 — GitHub 관련 변수가 없으면 회원가입 신청/승인/회원관리가 배포 환경에서 조용히 실패합니다.
 3. `main` 브랜치에 push하면 자동으로 재배포됩니다(데이터 파일이 git에 커밋되어 있으므로, 데이터 변경도 push만으로 반영됩니다).
 
 ## 범위
