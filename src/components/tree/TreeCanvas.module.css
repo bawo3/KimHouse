@@ -5,11 +5,11 @@
 }
 
 .zoomButton {
-  padding: 0.4rem 0.9rem;
+  padding: 0.6rem 1rem;
   border: 1px solid #d0d0d0;
   border-radius: 8px;
   background: #ffffff;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   cursor: pointer;
 }
 
