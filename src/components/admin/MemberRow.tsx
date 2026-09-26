@@ -1,6 +1,7 @@
 import type { Member } from "@/lib/members/schema";
 import { updateMemberPhoneAction, updateMemberRoleAction } from "@/app/admin/members/actions";
 import { SubmitButton } from "@/components/admin/SubmitButton";
+import { DeleteMemberButton } from "@/components/admin/DeleteMemberButton";
 import styles from "./MemberRow.module.css";
 
 // 회원관리 목록의 한 줄(인물 1명)을 보여주는 컴포넌트.
@@ -13,6 +14,8 @@ import styles from "./MemberRow.module.css";
 //   생성 위험은 없지만, 더블클릭 시 GitHub 커밋 API에 동시에 두 번 요청이 나가면
 //   먼저 도착한 요청이 파일을 갱신한 직후 두 번째 요청의 sha가 낡은 값이 되어
 //   충돌 에러(커밋 실패)로 이어질 수 있어, 동일한 비활성화 패턴을 그대로 적용해 예방한다.
+// - 삭제 버튼은 role이 "owner"인 행에는 아예 렌더링하지 않는다(서버 액션 deleteMemberAction도
+//   owner 삭제를 거부하지만, 실수로 시도조차 할 수 없도록 UI에서 이중으로 막는다).
 export function MemberRow({ member, isOwnerViewer }: { member: Member; isOwnerViewer: boolean }) {
   return (
     <div className={styles.row}>
@@ -31,6 +34,7 @@ export function MemberRow({ member, isOwnerViewer }: { member: Member; isOwnerVi
           <SubmitButton label="권한 저장" pendingLabel="저장 중..." />
         </form>
       )}
+      {member.role !== "owner" && <DeleteMemberButton memberId={member.id} name={member.name} />}
     </div>
   );
 }
