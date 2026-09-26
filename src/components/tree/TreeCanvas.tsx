@@ -171,7 +171,11 @@ export function TreeCanvas({ rows, members }: { rows: GenerationRowData[]; membe
           className={styles.searchInput}
         />
       </div>
-      {showNoMatchMessage && <p className={styles.noMatchMessage}>일치하는 사람이 없습니다</p>}
+      {showNoMatchMessage && (
+        <p role="status" className={styles.noMatchMessage}>
+          일치하는 사람이 없습니다
+        </p>
+      )}
       <div
         ref={containerRef}
         className={styles.canvas}
